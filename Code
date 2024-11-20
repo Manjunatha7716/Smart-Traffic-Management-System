@@ -1,0 +1,71 @@
+import cv2
+import time
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class TrafficSignalControl:
+    def __init__(self, camera_index=0):
+        self.camera_index = camera_index
+        self.cap = None
+        self.signal_state = 'Green'
+
+    def start_camera(self):
+        """Initialize the webcam feed."""
+        self.cap = cv2.VideoCapture(self.camera_index)
+        if not self.cap.isOpened():
+            logging.error("Failed to open webcam")
+            return False
+        logging.info("Webcam feed started successfully")
+        return True
+
+    def process_frame(self, frame):
+        """Process each frame, simulate traffic signal control."""
+        # Dummy logic for traffic signal change (can be replaced with AI-based logic)
+        if self.signal_state == 'Green':
+            cv2.putText(frame, "Signal: Green", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+            # Simulate state change after 5 seconds
+            time.sleep(5)
+            self.signal_state = 'Red'
+        elif self.signal_state == 'Red':
+            cv2.putText(frame, "Signal: Red", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+            # Simulate state change after 5 seconds
+            time.sleep(5)
+            self.signal_state = 'Green'
+
+        return frame
+
+    def show_frame(self, frame):
+        """Display the processed frame."""
+        cv2.imshow('Traffic Management', frame)
+
+    def stop_camera(self):
+        """Release the webcam and close all windows."""
+        self.cap.release()
+        cv2.destroyAllWindows()
+        logging.info("Camera feed stopped")
+
+    def run(self):
+        """Main function to run the traffic management system."""
+        if not self.start_camera():
+            return
+
+        while True:
+            ret, frame = self.cap.read()
+            if not ret:
+                logging.error("Failed to capture frame")
+                break
+
+            frame = self.process_frame(frame)
+            self.show_frame(frame)
+
+            # Exit loop when 'q' is pressed
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        self.stop_camera()
+
+if __name__ == "__main__":
+    system = TrafficSignalControl()
+    system.run()
